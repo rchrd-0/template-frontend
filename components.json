@@ -10,10 +10,11 @@
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "hugeicons",
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "utils": "@//utils/tailwind",
+    "utils": "@/utils/tailwind",
+    "lib": "@/lib",
     "ui": "@/components/ui",
     "hooks": "@/hooks"
   },
