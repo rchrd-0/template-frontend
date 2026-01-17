@@ -1,12 +1,15 @@
-# RCHRD-0's Frontend Template
+# RCHRD-0's Frontend Template (TanStack Router)
 
 My personal production-ready, DX-optimized frontend template/starter kit.
 Built for speed, type safety, and "batteries-included" features without the bloat.
+
+**This branch (`tanstack-router`) uses TanStack Router for file-based routing.**
 
 ## Tech Stack
 
 - **Framework**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
 - **Language**: TypeScript
+- **Routing**: [TanStack Router](https://tanstack.com/router/latest)
 - **Linting/Formatting**: [Biome](https://biomejs.dev)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
 - **Components**: [shadcn/ui](https://ui.shadcn.com)
@@ -16,6 +19,7 @@ Built for speed, type safety, and "batteries-included" features without the bloa
 
 ## Key Features
 
+- **File-Based Routing**: Create files in `src/routes` and they automatically become routes.
 - **Auth Ready**: Pre-built `AuthProvider` context and `useAuth` hook. Auto-injects JWT tokens into requests and handles 401 logouts automatically.
 - **Robust API Layer**:
     - `src/api/client.ts`: Centralized client with error handling & type safety.
@@ -28,7 +32,8 @@ Built for speed, type safety, and "batteries-included" features without the bloa
 
 1. **Clone & Install**
    ```bash
-   git clone git@github.com:rchrd-0/template-frontend.git my-app
+   # Clone the specific branch
+   git clone -b tanstack-router git@github.com:rchrd-0/template-frontend.git my-app
    cd my-app
    rm -rf .git
    git init
@@ -50,6 +55,48 @@ Built for speed, type safety, and "batteries-included" features without the bloa
    ```
 
 ## Architecture Guide
+
+### Routing
+This template uses **TanStack Router** with file-based routing.
+- **New Page**: Create `src/routes/about.tsx` -> `/about`
+- **Dynamic Route**: Create `src/routes/users/$userId.tsx` -> `/users/123`
+- **Layouts**: Use `src/routes/__root.tsx` for the global layout.
+
+```tsx
+// src/routes/about.tsx
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/about')({
+  component: About,
+})
+
+function About() {
+  return <div>Hello from About!</div>
+}
+```
+
+### Advanced: Integrating Auth with Router
+If you need to protect routes using `beforeLoad` and `redirect`, you can inject the Auth Context into the Router.
+
+1. **Modify `src/integrations/tanstack-router/root-provider.tsx`**:
+```tsx
+import { useAuth } from "@/hooks/useAuth";
+
+// ... inside the component ...
+const auth = useAuth();
+return <RouterProvider router={router} context={{ auth }} />;
+```
+
+2. **Protect a Route**:
+```tsx
+export const Route = createFileRoute('/dashboard')({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({ to: '/login' })
+    }
+  },
+})
+```
 
 ### API & Data Fetching
 Define routes in `src/api/routes.ts`. Use standard `ky` syntax.
@@ -92,6 +139,9 @@ src/
 ├── contexts/       # AuthProvider
 ├── hooks/          # Custom hooks (useAuth)
 ├── lib/            # Utilities (auth storage, tailwind merge)
-├── integrations/   # TanStack Query config
-└── App.tsx         # Root component
+├── integrations/   # TanStack Query & Router config
+├── routes/         # File-based routes (TanStack Router)
+│   ├── __root.tsx  # Global layout
+│   └── index.tsx   # Homepage
+└── main.tsx        # Entry point
 ```
