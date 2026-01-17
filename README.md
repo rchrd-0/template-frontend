@@ -78,7 +78,7 @@ const { login, logout, isAuthenticated } = useAuth()
 ### Adding Components
 This project is pre-configured for **shadcn/ui**.
 ```bash
-npx shadcn@latest add button input form
+bunx --bun shadcn@latest add button input form
 ```
 
 ## Project Structure
