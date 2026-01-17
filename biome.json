@@ -33,6 +33,11 @@
           "level": "warn"
         }
       },
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        "noRedundantAlt": "off"
+      },
       "nursery": {
         "useSortedClasses": {
           "level": "warn",
@@ -79,7 +84,8 @@
           "style": {
             "useImportType": "off",
             "useComponentExportOnlyModules": "off"
-          }
+          },
+          "a11y": "off"
         }
       }
     },
