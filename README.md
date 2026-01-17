@@ -1,6 +1,6 @@
-# RCHRD-0's Frontend Scaffold
+# RCHRD-0's Frontend Template
 
-My personal production-ready, DX-optimized frontend template.
+My personal production-ready, DX-optimized frontend template/starter kit.
 Built for speed, type safety, and "batteries-included" features without the bloat.
 
 ## Tech Stack
