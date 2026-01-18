@@ -49,6 +49,16 @@ Built for speed, type safety, and "batteries-included" features without the bloa
    bun dev
    ```
 
+## Commands
+
+| Command | Description |
+| :--- | :--- |
+| `bun dev` | Start development server with HMR |
+| `bun check` | Run Biome lint & TypeScript check |
+| `bun format` | Format code with Biome |
+| `bun build` | Build for production |
+| `bun preview` | Preview production build locally |
+
 ## Architecture Guide
 
 ### API & Data Fetching
