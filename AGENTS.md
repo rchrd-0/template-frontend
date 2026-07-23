@@ -126,7 +126,7 @@ src/
 ├── utils/          # Small focused utilities, such as class-name composition
 ├── main.tsx        # Application entry point
 ├── routeTree.gen.ts
-└── styles.css
+└── index.css
 ```
 
 Place code according to responsibility and follow the nearest existing precedent. Do not create

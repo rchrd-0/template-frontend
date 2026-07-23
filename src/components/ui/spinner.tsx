@@ -1,9 +1,10 @@
-import { Loader2Icon } from "lucide-react";
+import { SpinnerIcon } from "@phosphor-icons/react";
 import { cn } from "@/utils/tailwind";
 
 function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
   return (
-    <Loader2Icon
+    <SpinnerIcon
+      data-slot="spinner"
       role="status"
       aria-label="Loading"
       className={cn("size-4 animate-spin", className)}
