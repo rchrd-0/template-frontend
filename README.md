@@ -1,107 +1,129 @@
-# RCHRD-0's Frontend Template
+# Frontend template without routing
 
-My personal production-ready, DX-optimized frontend template/starter kit.
-Built for speed, type safety, and "batteries-included" features without the bloat.
+The `no-router` branch is a reusable React and Vite starter for applications that do not need an application router. Use the default `main` branch when you want TanStack Router with file-based routing.
 
-## Tech Stack
+## Stack
 
-- **Framework**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
-- **Language**: TypeScript
-- **Linting/Formatting**: [Biome](https://biomejs.dev)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
-- **Components**: [shadcn/ui](https://ui.shadcn.com)
-- **State/Async**: [TanStack Query v5](https://tanstack.com/query/latest)
-- **API Client**: [Ky](https://github.com/sindresorhus/ky) (Fetch wrapper)
-- **Notifications**: [Sonner](https://sonner.emilkowal.ski)
+- React 19 and TypeScript
+- Vite with Bun for package management and scripts
+- TanStack Query, including its development tools
+- Tailwind CSS 4 through the Vite plugin
+- shadcn 4 components built on Base UI primitives
+- Phosphor icons
+- Ky for JSON API requests
+- Sonner for notifications
+- Biome for formatting and linting
 
-## Key Features
+## Included conventions
 
-- **Auth Ready**: Pre-built `AuthProvider` context and `useAuth` hook. Auto-injects JWT tokens into requests and handles 401 logouts automatically.
-- **Robust API Layer**:
-    - `src/api/client.ts`: Centralized client with error handling & type safety.
-    - `src/api/routes.ts`: Define endpoints cleanly (async/await optional).
-    - **Proxy Configured**: Dev server proxies `/api` -> `http://localhost:3001` (avoids CORS locally).
-- **Layouts**: `PageLayout` component with built-in Toast notifications and max-width constraints.
-- **UI Utils**: `<Spinner />`, `<Toaster />`, and `cn()` utility pre-configured.
+- `src/App.tsx` is the application root without a routing abstraction
+- Shared UI source lives in `src/components/ui`
+- `src/index.css` is the Tailwind and application stylesheet entry point
+- `components.json` uses the `base-lyra` style and Phosphor icon library
+- The development server proxies `/api` to `http://localhost:3001`
+- Authentication scaffolding is optional and can be removed when the product does not need it
 
-## Getting Started
+## Create a project
 
-1. **Clone & Install**
-   ```bash
-   git clone git@github.com:rchrd-0/template-frontend.git my-app
-   cd my-app
-   rm -rf .git
-   git init
-   bun install # or npm/pnpm/yarn
-   ```
+Clone the routerless branch and initialize a new repository:
 
-2. **Environment Setup**
-   The app works out-of-the-box for local dev (proxies to `localhost:3001`).
+```bash
+git clone -b no-router git@github.com:rchrd-0/template-frontend.git my-app
+cd my-app
+rm -rf .git
+git init
+bun install
+bun dev
+```
 
-   For production or custom backends:
-   ```bash
-   cp .env.example .env
-   # Set VITE_API_BASE_URL=https://api.myapp.com
-   ```
+For file-based routing, clone the default `main` branch instead:
 
-3. **Run Development Server**
-   ```bash
-   bun dev
-   ```
+```bash
+git clone git@github.com:rchrd-0/template-frontend.git my-app
+```
+
+## Configure the API
+
+Local requests to `/api` use the Vite proxy. To target another API, copy the environment example and set the public base URL:
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+VITE_API_BASE_URL=https://api.example.com
+```
+
+Do not put private keys or server-only secrets in `VITE_*` variables.
 
 ## Commands
 
-| Command | Description |
-| :--- | :--- |
-| `bun dev` | Start development server with HMR |
-| `bun check` | Run Biome lint & TypeScript check |
-| `bun format` | Format code with Biome |
-| `bun build` | Build for production |
-| `bun preview` | Preview production build locally |
+| Command | Purpose |
+| --- | --- |
+| `bun install` | Install dependencies |
+| `bun dev` | Start the development server |
+| `bun check` | Run Biome checks and TypeScript type checking |
+| `bun check:fix` | Apply safe Biome fixes, then type-check |
+| `bun format` | Format source files with Biome |
+| `bun run build` | Type-check and create a production build |
+| `bun preview` | Preview the production build |
 
-## Architecture Guide
+## Build the application root
 
-### API & Data Fetching
-Define routes in `src/api/routes.ts`. Use standard `ky` syntax.
-```ts
-// src/api/routes.ts
-export const api = {
-  getUsers: () => apiClient.get("users").json<User[]>(),
-  login: (creds) => apiClient.post("login", { json: creds }).json<AuthResponse>()
-};
-```
+Compose the application in `src/App.tsx`. Keep one-screen interactions local instead of adding a routing abstraction for hypothetical pages.
 
-Consume in components with React Query:
+If the product later needs navigable pages, consider starting from `main` rather than recreating its TanStack Router integration.
+
+## Fetch API data
+
+Define endpoint functions in `src/api/routes.ts`, then consume them through TanStack Query. The shared Ky client unwraps the repository's JSON response envelope and converts failed responses into `ApiError` instances.
+
 ```tsx
-const { data: users } = useQuery({
-  queryKey: ['users'],
-  queryFn: api.getUsers
+const healthQuery = useQuery({
+  queryKey: ["health"],
+  queryFn: api.checkHealth,
 });
 ```
 
-### Authentication
-The `src/lib/auth.ts` helper manages tokens in `localStorage`.
-```tsx
-const { login, logout, isAuthenticated } = useAuth()
-```
+Inspect `src/api/client.ts` before adding endpoints with streaming, file, plain-text, or nonstandard responses.
 
-### Adding Components
-This project is pre-configured for **shadcn/ui**.
+## Choose whether to keep authentication
+
+The repository includes an optional `AuthProvider`, local token helper, and Ky authentication hooks. Keep and adapt them only when the product requires authentication.
+
+For a public application, remove:
+
+- `src/contexts/AuthProvider.tsx`
+- `src/lib/auth.ts`
+- The `AuthProvider` wrapper in `src/main.tsx`
+- Bearer-token injection and token-clearing behavior in `src/api/client.ts`
+- Any login, logout, or auth-context code added later
+
+Do not assume that a new application needs a JSON Web Token (JWT) in `localStorage`. Choose the session mechanism from the server contract when authentication is required.
+
+## Add UI components
+
+The shadcn configuration targets Base UI, Phosphor icons, Tailwind CSS 4, and `src/index.css`. Inspect `components.json` before running the command:
+
 ```bash
 bunx --bun shadcn@latest add button input form
 ```
 
-## Project Structure
+Generated components become repository-owned source under `src/components/ui`. Adapt them to the application instead of treating them as opaque package code.
 
-```
+## Source structure
+
+```text
 src/
-├── api/            # API client and route definitions
-├── components/
-│   ├── layout/     # PageLayout, Wrapper
-│   ├── ui/         # Shadcn components + Spinner/Sonner
-├── contexts/       # AuthProvider
-├── hooks/          # Custom hooks (useAuth)
-├── lib/            # Utilities (auth storage, tailwind merge)
-├── integrations/   # TanStack Query config
-└── App.tsx         # Root component
+├── api/          # Ky client, response types, and endpoints
+├── components/   # Layout and UI components
+├── contexts/     # Optional application-wide contexts
+├── integrations/ # TanStack Query setup
+├── lib/          # Browser services and shared helpers
+├── utils/        # Focused utilities
+├── App.tsx       # Application root
+├── index.css     # Tailwind and application styles
+└── main.tsx      # Application entry point
 ```
+
+See `AGENTS.md` for implementation conventions, scope guardrails, and completion checks.
