@@ -194,22 +194,39 @@ Use the existing API layer for ordinary JSON requests.
 - Use stable, descriptive query keys and update or invalidate relevant data after mutations.
 - Represent loading, empty, success, and error states when they apply to the user flow.
 
-Inspect the shared client before adding an endpoint; it applies authentication and assumes a JSON
-response envelope. For streaming output, server-sent events, files, or plain text, use a separate
-focused client or direct `fetch` rather than distorting the standard abstraction.
+Inspect the shared client before adding an endpoint; it assumes a JSON response envelope and may
+include the optional authentication hooks described below. For streaming output, server-sent
+events, files, or plain text, use a separate focused client or direct `fetch` rather than distorting
+the standard abstraction.
 
 Never expose private API keys or server-only secrets in browser code or `VITE_*` variables.
 
 ## Authentication
 
-Authentication support exists in the template, but not every product needs it.
+Authentication is an optional scaffold, not a required part of applications built from this
+template. Decide from the product requirements whether authentication is in scope; do not keep or
+extend it merely because starter files exist.
 
-- Do not build login, registration, protected routes, or token refresh unless requested.
-- Preserve the existing token-handling conventions when authentication is required.
-- Treat browser-stored tokens and authenticated request behaviour as security-sensitive.
-- Do not log tokens or secrets.
-- Do not remove or bypass authentication infrastructure unless the task explicitly includes
-  simplifying it for a product that does not need authentication.
+When the application does not require authentication, remove the scaffold completely rather than
+leaving unused providers, token storage, request hooks, or route decisions in place:
+
+- Delete `src/contexts/AuthProvider.tsx` and remove its import and wrapper from `src/main.tsx`.
+- Delete `src/lib/auth.ts`; a public application does not need a JWT or other token in
+  `localStorage`.
+- Remove the auth import, bearer-token injection, and token-clearing/redirect behaviour from
+  `src/api/client.ts`, while preserving its general response parsing and error handling.
+- Remove any auth-specific router context and types, protected-route `beforeLoad` checks, login or
+  logout routes, auth-only UI, hooks, query keys, and tests when they exist.
+- Remove stale auth documentation and examples from `README.md`, plus any auth-specific environment
+  variables, so the resulting project does not imply that authentication is configured.
+- Do not replace removed auth code with empty providers, placeholder contexts, mocked sessions, or
+  speculative abstractions.
+
+When authentication is required, confirm the server contract and intended session mechanism before
+implementation. The included JWT-in-`localStorage` approach is only a replaceable starting point,
+not a project convention that must be preserved. Build login, registration, route protection,
+token refresh, and logout behaviour only when the requirements call for them. Treat browser-stored
+tokens and authenticated requests as security-sensitive, and never log tokens or secrets.
 
 ## AI Features
 
