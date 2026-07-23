@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./styles.css";
+import "./index.css";
 import { AuthProvider } from "@/contexts/AuthProvider.tsx";
 import { TanstackQueryProvider } from "@/integrations/tanstack-query/root-provider.tsx";
 import { TanstackRouterProvider } from "@/integrations/tanstack-router/root-provider.tsx";
