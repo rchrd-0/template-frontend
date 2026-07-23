@@ -14,12 +14,12 @@ rewrites. Preserve the existing architecture unless the task explicitly requires
 This template has two supported branches. Inspect the current branch and repository before making
 assumptions about routing:
 
-- `main` is the routing-agnostic starter and does not include an application router.
-- `tanstack-router` adds TanStack Router with file-based routing.
+- `main` is the default starter and includes TanStack Router with file-based routing.
+- `no-router` is the routing-agnostic variant and does not include an application router.
 
-Do not introduce a router on `main` unless the task requires one. Do not remove or replace TanStack
-Router on `tanstack-router` without a clear requirement. Guidance in the Routing section applies
-only when the current branch contains TanStack Router.
+Do not remove or replace TanStack Router on `main` without a clear requirement. Do not introduce a
+router on `no-router` unless the task requires one. Guidance in the Routing section applies only
+when the current branch contains TanStack Router.
 
 ## Stack
 
@@ -36,7 +36,7 @@ The shared stack is:
 - Sonner for notifications
 - Biome for formatting and linting
 
-The `tanstack-router` branch additionally uses TanStack Router with file-based routing.
+The `main` branch additionally uses TanStack Router with file-based routing.
 
 Use the libraries already present in the current branch. Do not introduce competing alternatives
 without a clear requirement. In particular:
@@ -86,7 +86,7 @@ bun dev
 bun check
 bun check:fix
 bun format
-bun build
+bun run build
 bun preview
 ```
 
@@ -97,7 +97,7 @@ For changes to application source, build configuration, or dependencies, run bef
 
 ```bash
 bun check
-bun build
+bun run build
 ```
 
 For documentation-only changes, these commands are optional unless the documentation changes
@@ -113,7 +113,7 @@ test framework automatically.
 
 ## Project Structure
 
-Follow the structure present on the current branch. On `tanstack-router`, the main source layout is:
+Follow the structure present on the current branch. On `main`, the main source layout is:
 
 ```text
 src/
@@ -138,8 +138,7 @@ regenerate the route tree and review the generated diff when routes change.
 
 ## Routing
 
-On the `tanstack-router` branch, routes live under `src/routes` and follow TanStack Router's
-file-routing conventions.
+On `main`, routes live under `src/routes` and follow TanStack Router's file-routing conventions.
 
 - Use route files for page composition and route-specific concerns.
 - Move substantial UI sections into focused components rather than putting an entire feature in a
@@ -150,8 +149,8 @@ file-routing conventions.
 - When adding or changing a route, verify in-app navigation, direct navigation, and refresh
   behaviour.
 
-On `main`, do not create a routing abstraction for a one-screen interaction or hypothetical future
-pages.
+On `no-router`, do not create a routing abstraction for a one-screen interaction or hypothetical
+future pages.
 
 ## Components and Styling
 

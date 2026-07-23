@@ -1,157 +1,142 @@
-# RCHRD-0's Frontend Template (TanStack Router)
+# Frontend template
 
-My personal production-ready, DX-optimized frontend template/starter kit.
-Built for speed, type safety, and "batteries-included" features without the bloat.
+This repository is a reusable React and Vite starter. The default `main` branch includes TanStack Router with file-based routing. Use `no-router` when the application does not need a router.
 
-**This branch (`tanstack-router`) uses TanStack Router for file-based routing.**
+## Stack
 
-## Tech Stack
+- React 19 and TypeScript
+- Vite with Bun for package management and scripts
+- TanStack Router and TanStack Query, including development tools
+- Tailwind CSS 4 through the Vite plugin
+- shadcn 4 components built on Base UI primitives
+- Phosphor icons
+- Ky for JSON API requests
+- Sonner for notifications
+- Biome for formatting and linting
 
-- **Framework**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
-- **Language**: TypeScript
-- **Routing**: [TanStack Router](https://tanstack.com/router/latest)
-- **Linting/Formatting**: [Biome](https://biomejs.dev)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
-- **Components**: [shadcn/ui](https://ui.shadcn.com)
-- **State/Async**: [TanStack Query v5](https://tanstack.com/query/latest)
-- **API Client**: [Ky](https://github.com/sindresorhus/ky) (Fetch wrapper)
-- **Notifications**: [Sonner](https://sonner.emilkowal.ski)
+## Included conventions
 
-## Key Features
+- Routes live in `src/routes` and generate `src/routeTree.gen.ts`
+- Shared UI source lives in `src/components/ui`
+- `src/index.css` is the Tailwind and application stylesheet entry point
+- `components.json` uses the `base-lyra` style and Phosphor icon library
+- The development server proxies `/api` to `http://localhost:3001`
+- Authentication scaffolding is optional and can be removed when the product does not need it
 
-- **File-Based Routing**: Create files in `src/routes` and they automatically become routes.
-- **Auth Ready**: Pre-built `AuthProvider` context and `useAuth` hook. Auto-injects JWT tokens into requests and handles 401 logouts automatically.
-- **Robust API Layer**:
-    - `src/api/client.ts`: Centralized client with error handling & type safety.
-    - `src/api/routes.ts`: Define endpoints cleanly (async/await optional).
-    - **Proxy Configured**: Dev server proxies `/api` -> `http://localhost:3001` (avoids CORS locally).
-- **Layouts**: `PageLayout` component with built-in Toast notifications and max-width constraints.
-- **UI Utils**: `<Spinner />`, `<Toaster />`, and `cn()` utility pre-configured.
+## Create a project
 
-## Getting Started
+Clone the default router-enabled branch and initialize a new repository:
 
-1. **Clone & Install**
-   ```bash
-   # Clone the specific branch
-   git clone -b tanstack-router git@github.com:rchrd-0/template-frontend.git my-app
-   cd my-app
-   rm -rf .git
-   git init
-   bun install # or npm/pnpm/yarn
-   ```
+```bash
+git clone git@github.com:rchrd-0/template-frontend.git my-app
+cd my-app
+rm -rf .git
+git init
+bun install
+bun dev
+```
 
-2. **Environment Setup**
-   The app works out-of-the-box for local dev (proxies to `localhost:3001`).
+For a project without a router, clone the `no-router` branch instead:
 
-   For production or custom backends:
-   ```bash
-   cp .env.example .env
-   # Set VITE_API_BASE_URL=https://api.myapp.com
-   ```
+```bash
+git clone -b no-router git@github.com:rchrd-0/template-frontend.git my-app
+```
 
-3. **Run Development Server**
-   ```bash
-   bun dev
-   ```
+## Configure the API
+
+Local requests to `/api` use the Vite proxy. To target another API, copy the environment example and set the public base URL:
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+VITE_API_BASE_URL=https://api.example.com
+```
+
+Do not put private keys or server-only secrets in `VITE_*` variables.
 
 ## Commands
 
-| Command | Description |
-| :--- | :--- |
-| `bun dev` | Start development server with HMR |
-| `bun check` | Run Biome lint & TypeScript check |
-| `bun format` | Format code with Biome |
-| `bun build` | Build for production |
-| `bun preview` | Preview production build locally |
+| Command | Purpose |
+| --- | --- |
+| `bun install` | Install dependencies |
+| `bun dev` | Start the development server |
+| `bun check` | Run Biome checks and TypeScript type checking |
+| `bun check:fix` | Apply safe Biome fixes, then type-check |
+| `bun format` | Format source files with Biome |
+| `bun run build` | Type-check and create a production build |
+| `bun preview` | Preview the production build |
 
-## Architecture Guide
+## Add routes
 
-### Routing
-This template uses **TanStack Router** with file-based routing.
-- **New Page**: Create `src/routes/about.tsx` -> `/about`
-- **Dynamic Route**: Create `src/routes/users/$userId.tsx` -> `/users/123`
-- **Layouts**: Use `src/routes/__root.tsx` for the global layout.
+Create files under `src/routes` using TanStack Router file-routing conventions. The router plugin regenerates `src/routeTree.gen.ts`; do not edit that file manually.
 
 ```tsx
-// src/routes/about.tsx
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/about')({
-  component: About,
-})
+export const Route = createFileRoute("/about")({
+  component: AboutPage,
+});
 
-function About() {
-  return <div>Hello from About!</div>
+function AboutPage() {
+  return <main>About</main>;
 }
 ```
 
-### Advanced: Integrating Auth with Router
-If you need to protect routes using `beforeLoad` and `redirect`, you can inject the Auth Context into the Router.
+When routes change, verify in-app navigation, direct navigation, and browser refresh behavior.
 
-1. **Modify `src/integrations/tanstack-router/root-provider.tsx`**:
+## Fetch API data
+
+Define endpoint functions in `src/api/routes.ts`, then consume them through TanStack Query. The shared Ky client unwraps the repository's JSON response envelope and converts failed responses into `ApiError` instances.
+
 ```tsx
-import { useAuth } from "@/hooks/useAuth";
-
-// ... inside the component ...
-const auth = useAuth();
-return <RouterProvider router={router} context={{ auth }} />;
-```
-
-2. **Protect a Route**:
-```tsx
-export const Route = createFileRoute('/dashboard')({
-  beforeLoad: ({ context }) => {
-    if (!context.auth.isAuthenticated) {
-      throw redirect({ to: '/login' })
-    }
-  },
-})
-```
-
-### API & Data Fetching
-Define routes in `src/api/routes.ts`. Use standard `ky` syntax.
-```ts
-// src/api/routes.ts
-export const api = {
-  getUsers: () => apiClient.get("users").json<User[]>(),
-  login: (creds) => apiClient.post("login", { json: creds }).json<AuthResponse>()
-};
-```
-
-Consume in components with React Query:
-```tsx
-const { data: users } = useQuery({
-  queryKey: ['users'],
-  queryFn: api.getUsers
+const healthQuery = useQuery({
+  queryKey: ["health"],
+  queryFn: api.checkHealth,
 });
 ```
 
-### Authentication
-The `src/lib/auth.ts` helper manages tokens in `localStorage`.
-```tsx
-const { login, logout, isAuthenticated } = useAuth()
-```
+Inspect `src/api/client.ts` before adding endpoints with streaming, file, plain-text, or nonstandard responses.
 
-### Adding Components
-This project is pre-configured for **shadcn/ui**.
+## Choose whether to keep authentication
+
+The repository includes an optional `AuthProvider`, local token helper, and Ky authentication hooks. Keep and adapt them only when the product requires authentication.
+
+For a public application, remove:
+
+- `src/contexts/AuthProvider.tsx`
+- `src/lib/auth.ts`
+- The `AuthProvider` wrapper in `src/main.tsx`
+- Bearer-token injection and token-clearing behavior in `src/api/client.ts`
+- Any login, logout, protected-route, or auth-context code added later
+
+Do not assume that a new application needs a JSON Web Token (JWT) in `localStorage`. Choose the session mechanism from the server contract when authentication is required.
+
+## Add UI components
+
+The shadcn configuration targets Base UI, Phosphor icons, Tailwind CSS 4, and `src/index.css`. Inspect `components.json` before running the command:
+
 ```bash
 bunx --bun shadcn@latest add button input form
 ```
 
-## Project Structure
+Generated components become repository-owned source under `src/components/ui`. Adapt them to the application instead of treating them as opaque package code.
 
-```
+## Source structure
+
+```text
 src/
-├── api/            # API client and route definitions
-├── components/
-│   ├── layout/     # PageLayout, Wrapper
-│   ├── ui/         # Shadcn components + Spinner/Sonner
-├── contexts/       # AuthProvider
-├── hooks/          # Custom hooks (useAuth)
-├── lib/            # Utilities (auth storage, tailwind merge)
-├── integrations/   # TanStack Query & Router config
-├── routes/         # File-based routes (TanStack Router)
-│   ├── __root.tsx  # Global layout
-│   └── index.tsx   # Homepage
-└── main.tsx        # Entry point
+├── api/             # Ky client, response types, and endpoints
+├── components/      # Layout and UI components
+├── contexts/        # Optional application-wide contexts
+├── integrations/    # TanStack Query and Router setup
+├── lib/             # Browser services and shared helpers
+├── routes/          # TanStack Router route files
+├── utils/           # Focused utilities
+├── index.css        # Tailwind and application styles
+├── main.tsx         # Application entry point
+└── routeTree.gen.ts # Generated route tree
 ```
+
+See `AGENTS.md` for implementation conventions, scope guardrails, and completion checks.
